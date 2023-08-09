@@ -11,7 +11,10 @@
 		"chmod+x",
 		"shebang",
 		"hashbang",
-		"typescript"
+		"typescript",
+		"binary",
+		"bin",
+		"executable"
 	],
 	"license": "MIT",
 	"repository": "tommy-mitchell/execify-cli",

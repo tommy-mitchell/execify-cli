@@ -25,6 +25,7 @@ Usage
 Options
   --package, --pkg, -p  Set every binary in package.json as executable
   --fix-shebang         Convert shebangs to "#!/usr/bin/env node"
+  --all                 Set all flags
 
 Examples
   $ execify cli.js

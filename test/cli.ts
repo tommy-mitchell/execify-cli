@@ -11,6 +11,7 @@ const helpText = splitStdout`
 	Options
 	  --package, --pkg, -p  Set every binary in package.json as executable
 	  --fix-shebang         Convert shebangs to "#!/usr/bin/env node"
+	  --all                 Set all flags
 
 	Examples
 	  $ execify cli.js
@@ -56,7 +57,7 @@ test("resolves globs and sets executable", verifyCli, {
 	},
 });
 
-for (const flag of ["--package", "--pkg", "-p"]) {
+for (const flag of ["--package", "--pkg", "-p", "--all"]) {
 	test(`usePackage - ${flag} flag`, verifyCli, {
 		args: flag,
 		helperCalls: {
@@ -78,15 +79,18 @@ for (const flag of ["--package", "--pkg", "-p"]) {
 	});
 }
 
-test("fixShebangs uses getFiles output", verifyCli, {
-	args: "--fix-shebang shebang-*/fixture.ts",
-	helperCalls: {
-		getFiles: {
-			resolves: ["shebang-tsx/fixture.ts", "shebang-ts-node/fixture.ts"],
+for (const flag of ["--fix-shebang", "--all"]) {
+	test(`fixShebangs uses getFiles output - ${flag} flag`, verifyCli, {
+		args: `${flag} shebang-*/fixture.ts`,
+		helperCalls: {
+			getFiles: {
+				resolves: ["shebang-tsx/fixture.ts", "shebang-ts-node/fixture.ts"],
+			},
+			fixShebangs: {
+				callCount: 1,
+				args: [["shebang-tsx/fixture.ts", "shebang-ts-node/fixture.ts"]],
+			},
 		},
-		fixShebangs: {
-			callCount: 1,
-			args: [["shebang-tsx/fixture.ts", "shebang-ts-node/fixture.ts"]],
-		},
-	},
-});
+	});
+}
+
