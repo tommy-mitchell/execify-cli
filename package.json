@@ -34,7 +34,7 @@
 	],
 	"scripts": {
 		"prepare": "npm run build",
-		"build": "tsc -p tsconfig.build.json && node dist/cli.js --pkg --fix-shebang",
+		"build": "tsc -p tsconfig.build.json && node dist/cli.js --all",
 		"lint": "xo",
 		"test": "tsc --noEmit && c8 ava"
 	},
@@ -54,12 +54,10 @@
 		]
 	},
 	"dependencies": {
-		"exit-hook": "^3.2.0",
 		"globby": "^13.2.2",
-		"meow": "^12.0.1",
+		"meow": "^12.1.0",
 		"read-pkg-up": "^10.0.0",
-		"ts-pattern": "^5.0.5",
-		"tsconfig-replace-paths": "^0.0.14"
+		"ts-pattern": "^5.0.5"
 	},
 	"devDependencies": {
 		"@tommy-mitchell/tsconfig": "^1.1.0",
@@ -82,6 +80,6 @@
 		"ts-node": "^10.9.1",
 		"type-fest": "^4.2.0",
 		"typescript": "~5.1.6",
-		"xo": "^0.54.2"
+		"xo": "^0.56.0"
 	}
 }
