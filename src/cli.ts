@@ -1,6 +1,7 @@
 #!/usr/bin/env tsimp
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import meow from "meow";
+import { NODE_SHEBANG } from "./constants.js";
 import { fixShebangs, getFiles, setExecutableBits } from "./helpers.js";
 
 // dprint-ignore
@@ -10,7 +11,7 @@ const cli = meow(`
 
 	Options
 	  --package, --pkg, -p  Set every binary in package.json as executable
-	  --fix-shebang         Convert shebangs to "#!/usr/bin/env node"
+	  --fix-shebang         Convert shebangs to "${NODE_SHEBANG}"
 	  --all                 Set all flags
 
 	Examples

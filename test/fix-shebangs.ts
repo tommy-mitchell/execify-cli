@@ -3,9 +3,10 @@ import { promises as fs } from "node:fs";
 import test from "ava";
 import { temporaryDirectory } from "tempy";
 import { copyFile } from "copy-file";
-import pMap from "p-map";
 import esmock from "esmock";
+import shebangRegex from "shebang-regex";
 import * as tt from "testtriple";
+import { NODE_SHEBANG } from "../src/constants.js";
 import { atFixture } from "./helpers/util.js";
 
 type VerifyShebangsArguments = {
@@ -22,10 +23,10 @@ const verifyShebangs = test.macro(async (t, { fixtures, writeCount = fixtures.le
 		path.join(temporaryDir, `${fixture}-fixture.ts`)
 	));
 
-	await pMap(fixtures, async fixture => (copyFile(
+	await Promise.all(fixtures.map(async fixture => (copyFile(
 		path.join(atFixture(fixture), "fixture.ts"),
 		path.join(temporaryDir, `${fixture}-fixture.ts`),
-	)));
+	))));
 
 	const spy = tt.spy(fs.writeFile);
 
@@ -36,16 +37,16 @@ const verifyShebangs = test.macro(async (t, { fixtures, writeCount = fixtures.le
 	// Fix and verify temporary files
 	await fixShebangs(fixturePaths);
 
-	await pMap(fixturePaths, async fixture => {
+	await Promise.all(fixturePaths.map(async fixture => {
 		const output = await fs.readFile(fixture, "utf8");
 		const firstLine = output.split("\n")[0]!;
 
 		if (fixture.includes("no-shebang")) {
-			t.notRegex(firstLine, /#!.*/, "Included shebang!");
+			t.notRegex(firstLine, shebangRegex, "Included shebang!");
 		} else {
-			t.is(firstLine, "#!/usr/bin/env node");
+			t.is(firstLine, NODE_SHEBANG);
 		}
-	});
+	}));
 
 	const spyCallCount = tt.callsOf(spy).length;
 	t.is(spyCallCount, writeCount);

@@ -6,6 +6,7 @@ import { isExecutable } from "is-executable";
 import esmock from "esmock";
 import * as tt from "testtriple";
 import { $ } from "execa";
+import { NODE_SHEBANG } from "../src/constants.js";
 import { setExecutableBits } from "../src/helpers.js";
 
 test("one file", async t => {
@@ -13,7 +14,7 @@ test("one file", async t => {
 	const temporaryDir = temporaryDirectory();
 	const fixture = path.join(temporaryDir, "cli.js");
 
-	await fs.writeFile(fixture, "#!/usr/bin/env node", "utf8");
+	await fs.writeFile(fixture, NODE_SHEBANG, "utf8");
 	t.false(await isExecutable(fixture));
 
 	await setExecutableBits([fixture]);
@@ -30,7 +31,7 @@ test("multiple files", async t => {
 	];
 
 	await Promise.all(fixtures.map(async (fixture) => {
-		await fs.writeFile(fixture, "#!/usr/bin/env node", "utf8");
+		await fs.writeFile(fixture, NODE_SHEBANG, "utf8");
 		t.false(await isExecutable(fixture));
 	}));
 
@@ -53,7 +54,7 @@ test("already executable", async t => {
 	];
 
 	await Promise.all(fixtures.map(async (fixture) => {
-		await fs.writeFile(fixture, "#!/usr/bin/env node", "utf8");
+		await fs.writeFile(fixture, NODE_SHEBANG, "utf8");
 		await $$`chmod +x ${fixture}`;
 
 		t.true(await isExecutable(fixture));

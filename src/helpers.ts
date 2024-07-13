@@ -2,7 +2,9 @@
 import { constants as fsConstants, promises as fs } from "node:fs";
 import { globby } from "globby";
 import { readPackageUp } from "read-package-up";
+import shebangRegex from "shebang-regex";
 import { match, P } from "ts-pattern";
+import { NODE_SHEBANG } from "./constants.js";
 
 type GetFilesArguments = {
 	globs: string[];
@@ -51,11 +53,9 @@ export const setExecutableBits = async (filePaths: string[]) => (
 
 const fixShebang = async (filePath: string) => {
 	const file = await fs.readFile(filePath, "utf8");
-	const lines = file.split(/\r?\n/);
 
-	if (lines.at(0)?.startsWith("#!/")) {
-		lines[0] = "#!/usr/bin/env node";
-		await fs.writeFile(filePath, lines.join("\n"), "utf8");
+	if (shebangRegex.test(file)) {
+		await fs.writeFile(filePath, file.replace(shebangRegex, NODE_SHEBANG), "utf8");
 	}
 };
 

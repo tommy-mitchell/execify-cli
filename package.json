@@ -55,6 +55,7 @@
 		"globby": "^14.0.2",
 		"meow": "^13.2.0",
 		"read-package-up": "^11.0.0",
+		"shebang-regex": "^4.0.0",
 		"ts-pattern": "^5.2.0"
 	},
 	"devDependencies": {
@@ -74,7 +75,6 @@
 		"is-executable": "^2.0.1",
 		"make-executable": "^2.0.2",
 		"map-obj": "^5.0.2",
-		"p-map": "^7.0.2",
 		"proper-tags": "^2.0.2",
 		"tempy": "^3.1.0",
 		"testtriple": "^3.0.1",
