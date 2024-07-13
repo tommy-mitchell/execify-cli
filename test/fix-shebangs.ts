@@ -2,11 +2,11 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import test from "ava";
 import { temporaryDirectory } from "tempy";
-import { copyFile } from "cp-file";
+import { copyFile } from "copy-file";
 import pMap from "p-map";
 import esmock from "esmock";
 import * as tt from "testtriple";
-import { atFixture } from "./_test-helpers/util.js";
+import { atFixture } from "./helpers/util.js";
 
 type VerifyShebangsArguments = {
 	fixtures: string[];
@@ -14,6 +14,7 @@ type VerifyShebangsArguments = {
 };
 
 const verifyShebangs = test.macro(async (t, { fixtures, writeCount = fixtures.length }: VerifyShebangsArguments) => {
+	// eslint-disable-next-line unicorn/prevent-abbreviations
 	const temporaryDir = temporaryDirectory();
 
 	// Map and copy fixtures to temporary files
@@ -21,14 +22,14 @@ const verifyShebangs = test.macro(async (t, { fixtures, writeCount = fixtures.le
 		path.join(temporaryDir, `${fixture}-fixture.ts`)
 	));
 
-	await pMap(fixtures, async fixture => copyFile(
+	await pMap(fixtures, async fixture => (copyFile(
 		path.join(atFixture(fixture), "fixture.ts"),
 		path.join(temporaryDir, `${fixture}-fixture.ts`),
-	));
+	)));
 
 	const spy = tt.spy(fs.writeFile);
 
-	const { fixShebangs } = await esmock("../src/helpers.ts", {
+	const { fixShebangs } = await esmock("../src/helpers.js", { // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
 		"node:fs": { promises: { ...fs, writeFile: spy } }, // eslint-disable-line @typescript-eslint/naming-convention
 	}) as typeof import("../src/helpers.js"); // eslint-disable-line @typescript-eslint/consistent-type-imports
 

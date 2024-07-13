@@ -1,35 +1,34 @@
 import process from "node:process";
-import type { AsyncReturnType, RequireOneOrNone as OneOrNoneOf, IfNever } from "type-fest";
+import type { AsyncReturnType, IfNever, RequireOneOrNone as OneOrNoneOf } from "type-fest";
 import test, { type ExecutionContext } from "ava";
 import esmock from "esmock";
 import * as tt from "testtriple";
-import { P, match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 import { getProperty } from "dot-prop";
 import mapObject from "map-obj";
 import * as helpers from "../../src/helpers.js";
 import { splitStdout } from "./util.js";
 
 declare module "testtriple" {
-	type Spy<T, U = Extract<T, (...args: any) => any>> = (
-		IfNever<U, (...args: any) => void, U>
-	);
+	type Spy<T, U = Extract<T, (...args: any) => any>> = IfNever<U, (...args: any) => void, U>;
 
 	export function spy<T>(...functions: Array<Extract<T, (...args: any) => any>>): Spy<T>;
 }
 
+type Helpers = typeof helpers;
+
+// dprint-ignore
 type HelperCalls = number | {
-	[helper in keyof typeof helpers]?: number | (
+	[helper in keyof Helpers]?: number | (
 		| {
 			callCount: number;
-			args: Parameters<typeof helpers[helper]>;
+			args: Parameters<Helpers[helper]>;
 		}
 		| {
-			resolves?: AsyncReturnType<typeof helpers[helper]>;
+			resolves?: AsyncReturnType<Helpers[helper]>;
 		}
 	)
 };
-
-type Helpers = typeof helpers;
 
 type HelperStubs = {
 	[Helper in keyof Helpers]: ReturnType<typeof tt.spy<Helpers[Helper]>>;
@@ -54,8 +53,8 @@ const mockCli = async ({ helperCalls, args, logs }: MockCliArguments) => {
 	}) as HelperStubs;
 
 	/* eslint-disable @typescript-eslint/naming-convention */
-	await esmock("../../src/cli.ts", import.meta.url, {
-		"../../src/helpers.ts": helperStubs,
+	await esmock("../../src/cli.js", import.meta.url, { // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
+		"../../src/helpers.js": helperStubs,
 	}, {
 		"node:process": {
 			argv: [...process.argv, ...(args?.split(" ") ?? [])],
@@ -74,11 +73,12 @@ const mockCli = async ({ helperCalls, args, logs }: MockCliArguments) => {
 				throw new HelperStubError(`process.exit, exit code: ${code}`);
 			},
 		},
-		import: {
+		"import": {
 			console: {
-				log: (...args: string[]) => args.map(log => (
-					logs.push(...splitStdout(log))
-				)),
+				log: (...args: string[]) =>
+					args.map(log => (
+						logs.push(...splitStdout(log))
+					)),
 			},
 		},
 	}) as typeof import("../../src/cli.js"); // eslint-disable-line @typescript-eslint/consistent-type-imports
@@ -97,7 +97,13 @@ type VerifyCliSucceedsArguments = MockCliArguments & {
 	expected: string | string[];
 };
 
-const verifyCliSucceeds = async ({ t, expected, helperCalls, args, logs }: VerifyCliSucceedsArguments): Promise<HelperStubs> => {
+const verifyCliSucceeds = async ({
+	t,
+	expected,
+	helperCalls,
+	args,
+	logs,
+}: VerifyCliSucceedsArguments): Promise<HelperStubs> => {
 	let helperStubs: HelperStubs;
 
 	try {
@@ -113,13 +119,11 @@ const verifyCliSucceeds = async ({ t, expected, helperCalls, args, logs }: Verif
 		}
 	}
 
-	const expectedLogs = (expected === ""
+	const expectedLogs = expected === ""
 		? []
 		: (Array.isArray(expected)
 			? expected
-			: splitStdout(expected)
-		)
-	);
+			: splitStdout(expected));
 
 	t.deepEqual(logs, expectedLogs);
 
@@ -132,12 +136,7 @@ type VerifyCliFailsArguments = MockCliArguments & {
 };
 
 const verifyCliFails = async ({ t, message, ...mockCliArgs }: VerifyCliFailsArguments): Promise<HelperStubs> => {
-	// eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
-	const { helperStubs } = await t.throwsAsync<HelperStubError>(
-		mockCli(mockCliArgs),
-		{ message },
-	) as HelperStubError;
-
+	const { helperStubs } = await t.throwsAsync<HelperStubError>(mockCli(mockCliArgs), { message });
 	return helperStubs;
 };
 
@@ -178,6 +177,7 @@ const verifyHelperCalls = ({ t, helperCalls, helperStubs }: VerifyHelperCallsArg
 	}
 };
 
+// dprint-ignore
 type VerifyCliArguments = {
 	args?: string;
 	helperCalls?: HelperCalls;
@@ -186,15 +186,19 @@ type VerifyCliArguments = {
 	errorMessage: string;
 }>;
 
-export const verifyCli = test.macro(async (t, { args, output: expected = "", errorMessage, helperCalls = 0 }: VerifyCliArguments) => {
+export const verifyCli = test.macro(async (t, {
+	args,
+	output: expected = "",
+	errorMessage,
+	helperCalls = 0,
+}: VerifyCliArguments) => {
 	const logs: string[] = [];
 	const mockCliArgs: MockCliArguments = { helperCalls, args, logs };
 
 	// Stub helpers to remove side-effects and spy on call counts
 	const helperStubs = await (errorMessage === undefined
 		? verifyCliSucceeds({ t, expected, ...mockCliArgs })
-		: verifyCliFails({ t, message: errorMessage, ...mockCliArgs })
-	);
+		: verifyCliFails({ t, message: errorMessage, ...mockCliArgs }));
 
 	verifyHelperCalls({ t, helperCalls, helperStubs });
 });

@@ -1,8 +1,7 @@
 import test from "ava";
-import { getBinPath } from "get-bin-path";
-import { $ } from "execa";
-import { isExecutable } from "is-executable";
-import { splitStdout, verifyCli } from "./_test-helpers/index.js";
+import { execa } from "execa";
+import { getExecutableBinPath } from "get-executable-bin-path";
+import { splitStdout, verifyCli } from "./helpers/index.js";
 
 const helpText = splitStdout`
 	Usage
@@ -22,13 +21,10 @@ const helpText = splitStdout`
 `;
 
 test.serial("main", async t => {
-	let binPath = await getBinPath();
-	t.truthy(binPath, "No bin path found!");
+	// eslint-disable-next-line unicorn/prevent-abbreviations
+	const binPath = await getExecutableBinPath();
 
-	binPath = binPath!.replace("dist", "src").replace(".js", ".ts");
-	t.true(await isExecutable(binPath), "Source binary not executable!");
-
-	const { exitCode } = await $`${binPath}`;
+	const { exitCode } = await execa(binPath);
 	t.is(exitCode, 0);
 });
 
@@ -36,15 +32,12 @@ test("help - no arguments", verifyCli, {
 	output: helpText,
 });
 
-test("help - --help flag", verifyCli, {
-	args: "--help",
-	output: helpText,
-});
-
-test("help - -h short flag", verifyCli, {
-	args: "-h",
-	output: helpText,
-});
+for (const flag of ["--help", "-h"]) {
+	test(`help (${flag})`, verifyCli, {
+		args: flag,
+		output: helpText,
+	});
+}
 
 test("resolves globs and sets executable", verifyCli, {
 	args: "globs/**/*.ts",
@@ -58,7 +51,7 @@ test("resolves globs and sets executable", verifyCli, {
 });
 
 for (const flag of ["--package", "--pkg", "-p", "--all"]) {
-	test(`usePackage - ${flag} flag`, verifyCli, {
+	test(`usePackage (${flag})`, verifyCli, {
 		args: flag,
 		helperCalls: {
 			getFiles: {
@@ -68,7 +61,7 @@ for (const flag of ["--package", "--pkg", "-p", "--all"]) {
 		},
 	});
 
-	test(`globs with usePackage - ${flag} flag`, verifyCli, {
+	test(`globs with usePackage (${flag})`, verifyCli, {
 		args: `${flag} globs/**/*.ts`,
 		helperCalls: {
 			getFiles: {
@@ -80,7 +73,7 @@ for (const flag of ["--package", "--pkg", "-p", "--all"]) {
 }
 
 for (const flag of ["--fix-shebang", "--all"]) {
-	test(`fixShebangs uses getFiles output - ${flag} flag`, verifyCli, {
+	test(`fixShebangs uses getFiles output (${flag})`, verifyCli, {
 		args: `${flag} shebang-*/fixture.ts`,
 		helperCalls: {
 			getFiles: {
@@ -93,4 +86,3 @@ for (const flag of ["--fix-shebang", "--all"]) {
 		},
 	});
 }
-

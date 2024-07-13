@@ -9,6 +9,7 @@ import { $ } from "execa";
 import { setExecutableBits } from "../src/helpers.js";
 
 test("one file", async t => {
+	// eslint-disable-next-line unicorn/prevent-abbreviations
 	const temporaryDir = temporaryDirectory();
 	const fixture = path.join(temporaryDir, "cli.js");
 
@@ -20,6 +21,7 @@ test("one file", async t => {
 });
 
 test("multiple files", async t => {
+	// eslint-disable-next-line unicorn/prevent-abbreviations
 	const temporaryDir = temporaryDirectory();
 	const fixtures = [
 		path.join(temporaryDir, "cli-1.js"),
@@ -40,6 +42,7 @@ test("multiple files", async t => {
 });
 
 test("already executable", async t => {
+	// eslint-disable-next-line unicorn/prevent-abbreviations
 	const temporaryDir = temporaryDirectory();
 	const $$ = $({ cwd: temporaryDir });
 
@@ -56,10 +59,10 @@ test("already executable", async t => {
 		t.true(await isExecutable(fixture));
 	}));
 
-	/* eslint-disable @typescript-eslint/naming-convention, @typescript-eslint/consistent-type-imports */
+	/* eslint-disable @typescript-eslint/naming-convention, @typescript-eslint/consistent-type-imports, @typescript-eslint/no-unnecessary-type-assertion */
 	const spy = tt.spy();
 
-	const { setExecutableBits } = await esmock("../src/helpers.ts", import.meta.url, {
+	const { setExecutableBits } = await esmock("../src/helpers.js", import.meta.url, {
 		"node:fs": { promises: { ...fs, chmod: spy } },
 	}) as typeof import("../src/helpers.js");
 	/* eslint-enable */

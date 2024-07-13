@@ -1,8 +1,9 @@
-#!/usr/bin/env ts-node-esm
+#!/usr/bin/env tsimp
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import meow from "meow";
-import { getFiles, setExecutableBits, fixShebangs } from "./helpers.js";
+import { fixShebangs, getFiles, setExecutableBits } from "./helpers.js";
 
+// dprint-ignore
 const cli = meow(`
 	Usage
 	  $ execify [globs…]
@@ -41,10 +42,10 @@ const cli = meow(`
 });
 
 const globs = cli.input;
-const { help: helpShortFlag, package: usePackageFlag, fixShebang, all: allFlags } = cli.flags;
-const usePackage = usePackageFlag || allFlags;
+const usePackage = cli.flags.package || cli.flags.all;
+const fixShebang = cli.flags.fixShebang || cli.flags.all;
 
-if ((globs.length === 0 && !usePackage) || helpShortFlag) {
+if (globs.length === 0 && !usePackage) {
 	cli.showHelp(0);
 }
 
@@ -52,6 +53,6 @@ const filePaths = await getFiles({ globs, usePackage });
 
 await setExecutableBits(filePaths);
 
-if (fixShebang || allFlags) {
+if (fixShebang) {
 	await fixShebangs(filePaths);
 }

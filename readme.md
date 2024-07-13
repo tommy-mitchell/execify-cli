@@ -10,10 +10,13 @@ npm install --save-dev execify-cli
 
 <details>
 <summary>Other Package Managers</summary>
+<p>
 
 ```sh
 yarn add --dev execify-cli
 ```
+
+</p>
 </details>
 
 ## Usage

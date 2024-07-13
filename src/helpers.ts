@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-array-callback-reference */
-import { promises as fs, constants as fsConstants } from "node:fs";
+import { constants as fsConstants, promises as fs } from "node:fs";
 import { globby } from "globby";
-import { readPackageUp } from "read-pkg-up";
+import { readPackageUp } from "read-package-up";
 import { match, P } from "ts-pattern";
 
 type GetFilesArguments = {
@@ -22,12 +22,12 @@ export const getFiles = async ({ globs, usePackage }: GetFilesArguments): Promis
 		}
 
 		const { packageJson } = maybePackageJson;
-		const bins: string[] = match(packageJson.bin)
-			.with(P.string, bin => [bin])
+		const binaries: string[] = match(packageJson.bin)
+			.with(P.string, binary => [binary])
 			.with(P.nullish, () => [])
-			.otherwise(bin => Object.values(bin));
+			.otherwise(binary => Object.values(binary));
 
-		filePaths.push(...bins);
+		filePaths.push(...binaries);
 	}
 
 	return filePaths;

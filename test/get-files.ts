@@ -3,16 +3,17 @@ import type { RequireAllOrNone } from "type-fest";
 import test from "ava";
 import esmock from "esmock";
 import * as tt from "testtriple";
-import { readPackageUp } from "read-pkg-up";
+import { readPackageUp } from "read-package-up";
 import { getFiles as getFilesOriginal } from "../src/helpers.js";
-import { atFixture, atFixtureCwd } from "./_test-helpers/util.js";
+import { atFixture, atFixtureCwd } from "./helpers/util.js";
 
 const stubReadPackageUp = async (stub: () => Promise<any>) => (
-	esmock("../src/helpers.ts", {
-		"read-pkg-up": {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+	esmock<typeof import("../src/helpers.js")>("../src/helpers.js", {
+		"read-package-up": {
 			readPackageUp: stub,
 		},
-	}) as typeof import("../src/helpers.js") // eslint-disable-line @typescript-eslint/consistent-type-imports
+	})
 );
 
 type GetFilesArguments = RequireAllOrNone<{
@@ -44,26 +45,31 @@ const verifyFiles = test.macro(async (t, args: GetFilesArguments, { files }: Exp
 
 const expectedGlobFiles = ["globs/cli.js", "globs/cli.ts", "globs/src/cli.js", "globs/src/cli.ts"];
 
+// dprint-ignore
 test("resolves globs to respective files", verifyFiles,
 	{ globs: ["globs/**/cli.*"] },
 	{ files: expectedGlobFiles },
 );
 
+// dprint-ignore
 test("no globs returns empty array", verifyFiles,
 	{ globs: [] },
 	{ files: [] },
 );
 
+// dprint-ignore
 test("usePackage - handles bin as string", verifyFiles,
 	{ usePackage: true, fixture: "package-bin-string" },
 	{ files: ["foo.js"] },
 );
 
+// dprint-ignore
 test("usePackage - handles bin as object", verifyFiles,
 	{ usePackage: true, fixture: "package-bin-object" },
 	{ files: ["foo.js", "bar.js"] },
 );
 
+// dprint-ignore
 test("usePackage - handles empty bin", verifyFiles,
 	{ usePackage: true, fixture: "package-bin-empty" },
 	{ files: [] },
@@ -78,6 +84,7 @@ test("usePackage - errors if no package.json found", async t => {
 	);
 });
 
+// dprint-ignore
 test("combines resolved globs and package bin", verifyFiles,
 	{ globs: ["globs/**/cli.*"], usePackage: true, fixture: "package-bin-object" },
 	{ files: [...expectedGlobFiles, "foo.js", "bar.js"] },
