@@ -20,7 +20,7 @@ const helpText = splitStdout`
 	  $ execify --fix-shebang dist/ts-cli.js
 `;
 
-test.serial("main", async t => {
+test.serial("build", async t => {
 	// eslint-disable-next-line unicorn/prevent-abbreviations
 	const binPath = await getExecutableBinPath();
 
