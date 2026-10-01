@@ -5,7 +5,7 @@ import anyTest, { type TestFn } from "ava";
 import { Sema } from "async-sema";
 import { execa, type ExecaError, parseCommandString } from "execa";
 import { getExecutableBinPath } from "get-executable-bin-path";
-import type { RequireExactlyOne as OneOf } from "type-fest";
+import type { OneOf } from "../../src/types.ts";
 import { trimLines, withFixture } from "./util.ts";
 
 export const test = anyTest as TestFn<{
@@ -37,10 +37,10 @@ test.afterEach.always(t => {
 export const $ = execa({ all: true, env: { NO_COLOR: "1" }, reject: false });
 
 type VerifyCliMacroArgs = [
-	OneOf<{
-		error: string;
-		expected: string;
-	}> & {
+	OneOf<
+		{ error: string; },
+		{ expected: string; }
+	> & {
 		args?: string;
 		cwd?: string;
 		fixture?: string;

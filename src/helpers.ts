@@ -1,13 +1,15 @@
+import nodePath from "node:path";
 import process from "node:process";
+import type { OneOf } from "./types.ts";
 import { type Binary, hasShebang, log, readPackageJson, setExecutableBit } from "./utils.ts";
 
-type GetFilesArguments = {
+type Input = {
 	input: string[];
 	usePackage?: boolean;
 };
 
 /** Collates input file paths and binaries from `package.json`, deduplicating any input paths in `package.json`. */
-export const getBinaries = async ({ input, usePackage }: GetFilesArguments): Promise<Binary[]> => {
+export const getBinaries = async ({ input, usePackage }: Input): Promise<Binary[]> => {
 	const binaries: Binary[] = [];
 
 	if (usePackage) {
@@ -19,27 +21,31 @@ export const getBinaries = async ({ input, usePackage }: GetFilesArguments): Pro
 		}
 
 		binaries.push(...packageBinaries);
-		input = input.filter(path => packageBinaries.every(binary => binary.path !== path && binary.path !== `./${path}`));
 	}
 
-	return [...binaries, ...input.map(path => ({ path }))];
+	for (const path of input) {
+		const absolutePath = nodePath.resolve(process.cwd(), path);
+
+		if (binaries.every(binary => binary.absolutePath !== absolutePath)) {
+			binaries.push({ absolutePath, path });
+		}
+	}
+
+	return binaries;
 };
 
-type ExecifyResult = {
+type ExecifyResult = OneOf<{
 	didExecify: boolean;
-	error?: never;
 	hasShebang: boolean;
-} | {
-	didExecify?: never;
+}, {
 	error: string;
-	hasShebang?: never;
-};
+}>;
 
-const execifySingle = async (filePath: string): Promise<ExecifyResult> => {
+const execifySingle = async (path: string): Promise<ExecifyResult> => {
 	try {
 		return {
-			didExecify: await setExecutableBit(filePath),
-			hasShebang: await hasShebang(filePath),
+			didExecify: await setExecutableBit(path),
+			hasShebang: await hasShebang(path),
 		};
 	} catch (error) {
 		let message = String(error);

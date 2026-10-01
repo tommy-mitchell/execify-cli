@@ -51,7 +51,6 @@
 		"get-executable-bin-path": "^1.0.0",
 		"is-executable": "^2.0.1",
 		"test-quadruple": "^1.0.0",
-		"type-fest": "^5.10.0",
 		"typescript": "~6.0.3",
 		"xo": "^5.0.1"
 	},

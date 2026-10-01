@@ -16,12 +16,9 @@ export type Binary = {
 	path: string;
 };
 
-type PackageBinary = [
-	name: string,
-	path: string,
-];
+type PackageBinary = [name: string, path: string];
 
-const resolveBinary = ([name, path]: PackageBinary, packageJsonPath: string): Binary => ({
+const resolveBinaryFrom = ([name, path]: PackageBinary, packageJsonPath: string): Binary => ({
 	absolutePath: nodePath.resolve(nodePath.dirname(packageJsonPath), path),
 	name,
 	path,
@@ -35,7 +32,7 @@ export const readPackageJson = async (): Promise<Binary[] | undefined> => {
 		return;
 	}
 
-	const { packageJson, path: packageJsonPath } = maybePackageJson;
+	const { packageJson, path } = maybePackageJson;
 	const { bin, name } = packageJson;
 
 	if (!bin) {
@@ -43,8 +40,8 @@ export const readPackageJson = async (): Promise<Binary[] | undefined> => {
 	}
 
 	return typeof bin === "string"
-		? [resolveBinary([name, bin], packageJsonPath)]
-		: Object.entries(bin).map(binary => resolveBinary(binary, packageJsonPath));
+		? [resolveBinaryFrom([name, bin], path)]
+		: Object.entries(bin).map(binary => resolveBinaryFrom(binary, path));
 };
 
 const EXECUTABLE_MASK = fsConstants.S_IXUSR | fsConstants.S_IXGRP | fsConstants.S_IXOTH;
@@ -54,18 +51,15 @@ const EXECUTABLE_MASK = fsConstants.S_IXUSR | fsConstants.S_IXGRP | fsConstants.
 export const setExecutableBit = async (path: string): Promise<boolean> => {
 	const stats = await fs.stat(path);
 
-	// Same as 'chmod +x'
 	if ((stats.mode & EXECUTABLE_MASK) !== EXECUTABLE_MASK) {
-		await fs.chmod(path, stats.mode | EXECUTABLE_MASK);
+		await fs.chmod(path, stats.mode | EXECUTABLE_MASK); // Same as 'chmod +x'
 		return true;
 	}
 
 	return false;
 };
 
-const SHEBANG_REGEX = /^#!.+/v;
-
 export const hasShebang = async (path: string): Promise<boolean> => {
 	const content = await fs.readFile(path, "utf8");
-	return SHEBANG_REGEX.test(content);
+	return content.startsWith("#!");
 };
