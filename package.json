@@ -6,6 +6,9 @@
 	"repository": "tommy-mitchell/execify-cli",
 	"author": "Tommy Mitchell (https://tommymitchell.io)",
 	"type": "module",
+	"imports": {
+		"#src/*.ts": "./src/*.ts"
+	},
 	"bin": {
 		"execify": "./dist/cli.js"
 	},
@@ -65,8 +68,5 @@
 			"//": "Suppress loader warnings from esmock",
 			"NODE_OPTIONS": "--disable-warning=DeprecationWarning"
 		}
-	},
-	"imports": {
-		"#src/*.ts": "./src/*.ts"
 	}
 }
