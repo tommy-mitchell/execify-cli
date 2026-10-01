@@ -15,4 +15,23 @@ export default [...configs.xo, ...configs.dprint, {
 			exceptions: ["typescript"],
 		}],
 	},
+}, {
+	// TODO: move to main config
+	rules: {
+		"@typescript-eslint/consistent-type-imports": ["error", {
+			disallowTypeAnnotations: false,
+			fixStyle: "inline-type-imports",
+		}],
+		"@typescript-eslint/strict-boolean-expressions": ["error", {
+			allowNullableBoolean: true,
+			allowNullableObject: true,
+			allowNullableString: true, // diff from xo
+			allowNumber: false,
+			allowString: true, // diff from xo
+		}],
+		"no-warning-comments": "off",
+		"unicorn/expiring-todo-comments": ["error", {
+			allowWarningComments: false,
+		}],
+	},
 }];

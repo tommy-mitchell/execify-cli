@@ -1,7 +1,6 @@
 {
-	"name": "foo",
+	"name": "foo-cli",
 	"bin": {
-		"foo": "foo.js",
-		"bar": "bar.js"
+		"foo": "foo.js"
 	}
 }
