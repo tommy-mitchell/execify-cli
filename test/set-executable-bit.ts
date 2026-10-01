@@ -5,7 +5,7 @@ import { setExecutableBit } from "../src/utils.ts";
 import { withFixture } from "./helpers/util.ts";
 
 test("sets bitmask", async t => {
-	const { fixture } = await withFixture(t, "non-executable.js");
+	const fixture = await withFixture(t, "non-executable.js");
 	t.false(await isExecutable(fixture), "Fixture should not be executable!");
 
 	const result = await setExecutableBit(fixture);
@@ -14,9 +14,7 @@ test("sets bitmask", async t => {
 });
 
 test("does nothing if already executable", async t => {
-	const { $, fixture } = await withFixture(t, "executable.js");
-
-	await $`chmod +x ${fixture}`;
+	const fixture = await withFixture(t, "executable.js");
 	t.true(await isExecutable(fixture), "Fixture should be executable!");
 
 	const result = await setExecutableBit(fixture);

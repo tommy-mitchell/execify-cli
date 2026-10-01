@@ -1,0 +1,7 @@
+{
+	"name": "foo",
+	"bin": {
+		"bar": "./executable.ts",
+		"baz": "./nested/non-executable.ts"
+	}
+}

@@ -10,7 +10,7 @@ const withCwd = async (cwd: string) => (
 			"node:process": { cwd: () => cwd },
 		},
 		importMeta: import.meta,
-		modulePath: new URL("../src/utils.js", import.meta.url),
+		modulePath: "../src/utils.js",
 	})
 );
 
@@ -21,7 +21,7 @@ type MacroArgs = [{
 }];
 
 const verify = test.macro<MacroArgs>(async (t, { cwd, expected, fixture: fixtureName }) => {
-	const { fixture } = await withFixture(t, fixtureName);
+	const fixture = await withFixture(t, fixtureName);
 	const { readPackageJson } = await withCwd(cwd ? path.join(fixture, cwd) : fixture);
 
 	const binaries = await readPackageJson();

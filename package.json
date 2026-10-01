@@ -2,6 +2,26 @@
 	"name": "execify-cli",
 	"version": "0.2.1-0",
 	"description": "Easily make a Node.js CLI executable.",
+	"license": "MIT",
+	"repository": "tommy-mitchell/execify-cli",
+	"author": "Tommy Mitchell (https://tommymitchell.io)",
+	"type": "module",
+	"bin": {
+		"execify": "./dist/cli.js"
+	},
+	"engines": {
+		"node": "^22.22 || ^24.15 || >=26"
+	},
+	"scripts": {
+		"prepare": "npm run build",
+		"build": "tsc -p tsconfig.build.json && node dist/cli.js --pkg",
+		"lint": "xo",
+		"format": "dprint fmt && xo --fix",
+		"test": "NODE_OPTIONS=\"--disable-warning=DeprecationWarning\" c8 ava"
+	},
+	"files": [
+		"dist"
+	],
 	"keywords": [
 		"cli",
 		"cli-app",
@@ -10,40 +30,8 @@
 		"chmod",
 		"chmod+x",
 		"binary",
-		"bin",
-		"executable"
+		"bin"
 	],
-	"license": "MIT",
-	"repository": "tommy-mitchell/execify-cli",
-	"author": {
-		"name": "Tommy Mitchell",
-		"url": "https://tommymitchell.io"
-	},
-	"type": "module",
-	"engines": {
-		"node": "^22.22 || ^24.15 || >=26"
-	},
-	"bin": {
-		"execify": "dist/cli.js"
-	},
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"prepare": "npm run build",
-		"build": "tsc -p tsconfig.build.json && node dist/cli.js --pkg",
-		"lint": "xo",
-		"format": "dprint fmt && xo --fix",
-		"test": "c8 ava"
-	},
-	"ava": {
-		"files": [
-			"test/*.ts"
-		],
-		"extensions": [
-			"ts"
-		]
-	},
 	"dependencies": {
 		"log-symbols": "^7.0.1",
 		"meow": "^14.1.0",
@@ -54,21 +42,21 @@
 		"@tommy-mitchell/eslint-config-xo": "^2.0.0-beta.10",
 		"@tommy-mitchell/tsconfig": "^4.0.0",
 		"@types/node": "^22.20",
+		"async-sema": "^3.1.1",
 		"ava": "^8.0.1",
 		"c8": "^12.0.0",
-		"cross-env": "^7.0.3",
-		"dot-prop": "^9.0.0",
 		"dprint": "^0.58.0",
 		"execa": "^10.0.1",
 		"get-executable-bin-path": "^1.0.0",
 		"is-executable": "^2.0.1",
-		"make-executable": "^2.0.2",
-		"map-obj": "^6.0.0",
-		"proper-tags": "^2.0.2",
 		"test-quadruple": "^1.0.0",
-		"ts-pattern": "^5.9.0",
 		"type-fest": "^5.10.0",
 		"typescript": "~6.0.3",
 		"xo": "^5.0.1"
+	},
+	"ava": {
+		"extensions": [
+			"ts"
+		]
 	}
 }

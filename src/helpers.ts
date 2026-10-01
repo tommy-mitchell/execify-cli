@@ -54,11 +54,11 @@ const execifySingle = async (filePath: string): Promise<ExecifyResult> => {
 export const execify = async (binaries: Binary[]): Promise<void[]> => (
 	Promise.all(binaries.map(async ({ name, path }) => {
 		const { didExecify, error } = await execifySingle(path);
-		const nameSuffix = name ? ` (${name})` : ""; // eslint-disable-line @typescript-eslint/strict-boolean-expressions
+		const nameSuffix = name ? ` (${name})` : "";
 
 		if (didExecify) {
 			console.log(`${logSymbols.success} Execified "${path}"${nameSuffix}`);
-		} else if (error) { // eslint-disable-line @typescript-eslint/strict-boolean-expressions
+		} else if (error) {
 			console.log(`${logSymbols.error} Failed to execify "${path}", ${error}${nameSuffix}`);
 		} else {
 			console.log(`${logSymbols.info} "${path}" already executable${nameSuffix}`);

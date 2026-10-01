@@ -3,14 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ExecutionContext } from "ava";
-import { $, type Options as ExecaOptions } from "execa";
-import { createTag, stripIndentTransformer, trimResultTransformer } from "proper-tags";
 
-export const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const atFixture = (name: string) => path.join(__dirname, "..", "fixtures", name);
-
-export const atFixtureCwd = (name: string): ExecaOptions => ({ cwd: atFixture(name) });
+const atFixture = (name: string) => path.join(__dirname, "..", "fixtures", name);
 
 /** Makes a temporary directory and registers a teardown to remove it. */
 export const withTemporaryDirectory = async (t: ExecutionContext) => {
@@ -25,7 +21,7 @@ export const withTemporaryDirectory = async (t: ExecutionContext) => {
 	return temporaryDir;
 };
 
-/** Copies a fixture to a temporary directory. Returns path to copied fixture and an `execa` `$` with a `cwd` at the fixture's directory. */
+/** Copies a fixture to a temporary directory and returns path to copied fixture. */
 export const withFixture = async (t: ExecutionContext, name: string) => {
 	const temporaryDir = await withTemporaryDirectory(t);
 	const fixture = path.join(temporaryDir, name);
@@ -39,20 +35,5 @@ export const withFixture = async (t: ExecutionContext, name: string) => {
 		await fs.copyFile(originalFixture, fixture);
 	}
 
-	return { $: $({ cwd: path.dirname(fixture) }), fixture };
+	return fixture;
 };
-
-type Tag<ReturnType = string> = {
-	(string_: string): ReturnType;
-	(literals: TemplateStringsArray, ...placeholders: any[]): ReturnType;
-};
-
-export const trimStdout = createTag(
-	stripIndentTransformer(),
-	trimResultTransformer("smart"),
-) as unknown as Tag;
-
-export const splitStdout = createTag(
-	trimStdout,
-	{ onEndResult: (result: string) => result.split("\n") },
-) as unknown as Tag<string[]>;
