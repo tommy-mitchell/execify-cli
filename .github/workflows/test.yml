@@ -1,9 +1,9 @@
 name: CI Test
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
+
 jobs:
   test:
     name: Node.js ${{ matrix.node-version }}
@@ -11,12 +11,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, 21]
+        node-version: ["22.22", "24.15", "26"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: npx tsimp --start # Preload the transpiler
       - run: npm test

@@ -1,59 +1,45 @@
-#!/usr/bin/env tsimp
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+#!/usr/bin/env node
 import meow from "meow";
-import { NODE_SHEBANG } from "./constants.js";
-import { fixShebangs, getFiles, setExecutableBits } from "./helpers.js";
+import { execify, getBinaries } from "./helpers.ts";
 
 // dprint-ignore
 const cli = meow(`
 	Usage
-	  $ execify [globs…]
+	  $ execify [paths…]
 
 	Options
 	  --package, --pkg, -p  Set every binary in package.json as executable
-	  --fix-shebang         Convert shebangs to "${NODE_SHEBANG}"
-	  --all                 Set all flags
 
 	Examples
-	  $ execify cli.js
+	  $ execify dist/cli.js dist/bin.ts dist/foo.cjs
+	  ✔ Execified "dist/cli.js"
+	  ℹ "dist/cli.ts" already executable
+	  ✖ Failed to execify "dist/foo.cjs", file not found
 
-	  $ execify --pkg test/fixtures/**/cli.js
-
-	  $ execify --fix-shebang dist/ts-cli.js
+	  $ execify --pkg
+	  ✔ Execified "dist/foo.js" (foo-cli)
+	  ✔ Execified "dist/bar.js" (bar-cli)
 `, {
-	importMeta: import.meta,
 	description: false,
 	flags: {
 		help: {
-			type: "boolean",
 			shortFlag: "h",
+			type: "boolean",
 		},
 		package: {
-			type: "boolean",
-			shortFlag: "p",
 			aliases: ["pkg"],
-		},
-		fixShebang: {
-			type: "boolean",
-		},
-		all: {
+			shortFlag: "p",
 			type: "boolean",
 		},
 	},
+	importMeta: import.meta,
 });
 
-const globs = cli.input;
-const usePackage = cli.flags.package || cli.flags.all;
-const fixShebang = cli.flags.fixShebang || cli.flags.all;
+const { flags: { package: usePackage }, input } = cli;
 
-if (globs.length === 0 && !usePackage) {
+if (!usePackage && input.length === 0) {
 	cli.showHelp(0);
 }
 
-const filePaths = await getFiles({ globs, usePackage });
-
-await setExecutableBits(filePaths);
-
-if (fixShebang) {
-	await fixShebangs(filePaths);
-}
+const binaries = await getBinaries({ input, usePackage });
+await execify(binaries);

@@ -1,6 +1,8 @@
 # execify-cli
 
-Easily make a Node.js CLI executable. Sets permissions (`chmod +x`) and handles common TypeScript conversions. See [Roadmap](#roadmap) for more details.
+Easily make a Node.js CLI executable.
+
+Sets permissions (`chmod +x`) on given binaries, or optionally on every binary in `package.json`. Cross-platform.
 
 ## Install
 
@@ -16,40 +18,34 @@ npm install --save-dev execify-cli
 yarn add --dev execify-cli
 ```
 
+```sh
+pnpm add --save-dev execify-cli
+```
+
 </p>
 </details>
 
 ## Usage
 
-```
+```txt
 Usage
-  $ execify [globs…]
+  $ execify [paths…]
 
 Options
   --package, --pkg, -p  Set every binary in package.json as executable
-  --fix-shebang         Convert shebangs to "#!/usr/bin/env node"
-  --all                 Set all flags
 
 Examples
-  $ execify cli.js
+  $ execify dist/cli.js dist/bin.ts dist/foo.cjs
+  ✔ Execified "dist/cli.js"
+  ℹ "dist/cli.ts" already executable
+  ✖ Failed to execify "dist/foo.cjs", file not found
 
-  $ execify --pkg test/fixtures/**/cli.js
-
-  $ execify --fix-shebang dist/ts-cli.js
+  $ execify --pkg
+  ✔ Execified "dist/foo.js" (foo-cli)
+  ✔ Execified "dist/bar.js" (bar-cli)
 ```
-
-## Roadmap
-
-v0.1.0 is a minimal release. The following features were cut and will be added in the next minor version:
-
-- TypeScript import path mapping from `tsconfig.json` `paths` option
-- A flag to fix all TypeScript-related conversions
-- Logging of completed/failed files, improved error handling
 
 ## Related
 
-- [chmodx](https://github.com/johnowennixon/chmodx)
-- [ts-fix-shebang](https://github.com/johnowennixon/ts-fix-shebang)
-- [make-executable](https://github.com/bconnorwhite/make-executable)
-- [replace-in-files-cli](https://github.com/sindresorhus/replace-in-files-cli)
-- [tsconfig-replace-paths](https://github.com/jonkwheeler/tsconfig-replace-paths)
+- [chmodx](https://github.com/johnowennixon/chmodx) - A cross platform command line utility for setting the executable bits on files.
+- [make-executable](https://github.com/bconnorwhite/make-executable) - Set or remove the executable bits on a file.

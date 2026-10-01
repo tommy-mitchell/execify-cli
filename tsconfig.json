@@ -4,5 +4,9 @@
 	"include": ["src", "test"],
 	"compilerOptions": {
 		"noEmit": true,
+		"types": ["node"],
+		"rewriteRelativeImportExtensions": true,
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
 	},
 }
