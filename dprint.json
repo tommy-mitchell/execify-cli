@@ -1,4 +1,5 @@
 {
+	"$schema": "https://dprint.dev/schemas/v0.json",
 	"includes": ["**/*.{js,ts,json,jsonc,yml,markdown}"],
 	"extends": ["node_modules/@tommy-mitchell/dprint-config/index.json"],
 	"plugins": [
@@ -8,5 +9,8 @@
 		"npm:dprint-plugin-malva@0.16.0",
 		"npm:dprint-plugin-markup@0.27.5",
 		"npm:dprint-plugin-yaml@0.6.0"
-	]
+	],
+	"json": {
+		"trailingCommas": "maintain"
+	}
 }

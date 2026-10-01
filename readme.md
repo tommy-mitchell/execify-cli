@@ -4,6 +4,15 @@ Cross-platform `chmod +x`. Easily make a Node.js CLI executable.
 
 Sets executable permissions on given binaries, or optionally on every binary in the nearest `package.json`.
 
+Works well in build scripts:
+
+```jsonc
+// package.json
+"scripts": {
+	"build": "tsc && execify --pkg"
+}
+```
+
 ## Install
 
 ```sh
@@ -42,8 +51,8 @@ Examples
   ✖ Failed to execify "baz/xyz.sh", file not found
 
   $ execify --pkg
-  ✔ Execified "dist/foo.js" (foo-cli)
-  ✔ Execified "dist/bar.js" (bar-cli)
+  ✔ Execified "./dist/foo.js" (foo-cli)
+  ✔ Execified "./dist/bar.js" (bar-cli)
 ```
 
 ## Related

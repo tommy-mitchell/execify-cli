@@ -17,7 +17,7 @@
 		"build": "tsc -p tsconfig.build.json && node dist/cli.js --pkg",
 		"lint": "dprint check && xo",
 		"format": "dprint fmt && xo --fix",
-		"test": "NODE_OPTIONS=\"--disable-warning=DeprecationWarning\" c8 ava"
+		"test": "c8 ava"
 	},
 	"files": [
 		"dist"
@@ -39,7 +39,7 @@
 	},
 	"devDependencies": {
 		"@tommy-mitchell/dprint-config": "^0.8.0",
-		"@tommy-mitchell/eslint-config-xo": "^2.0.0-beta.10",
+		"@tommy-mitchell/eslint-config-xo": "^2.0.0-beta.11",
 		"@tommy-mitchell/tsconfig": "^4.0.0",
 		"@types/node": "^22.20",
 		"async-sema": "^3.1.1",
@@ -58,6 +58,11 @@
 	"ava": {
 		"extensions": [
 			"ts"
-		]
+		],
+		"environmentVariables": {
+			"concurrency": "10",
+			"//": "Suppress loader warnings from esmock",
+			"NODE_OPTIONS": "--disable-warning=DeprecationWarning"
+		}
 	}
 }

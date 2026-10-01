@@ -10,7 +10,7 @@ const atFixture = (name: string) => path.join(__dirname, "..", "fixtures", name)
 
 /** Makes a temporary directory and registers a teardown to remove it. */
 export const withTemporaryDirectory = async (t: ExecutionContext) => {
-	// TODO [engine:node@>=24]: use mkdtempDisposable
+	// TODO[engine:node@>=24]: use mkdtempDisposable
 	// eslint-disable-next-line unicorn/max-nested-calls
 	const temporaryDir = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "execify-cli-"));
 

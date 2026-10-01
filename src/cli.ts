@@ -19,8 +19,8 @@ const cli = meow(`
 	  ✖ Failed to execify "baz/xyz.sh", file not found
 
 	  $ execify --pkg
-	  ✔ Execified "dist/foo.js" (foo-cli)
-	  ✔ Execified "dist/bar.js" (bar-cli)
+	  ✔ Execified "./dist/foo.js" (foo-cli)
+	  ✔ Execified "./dist/bar.js" (bar-cli)
 `, {
 	description: false,
 	flags: {
