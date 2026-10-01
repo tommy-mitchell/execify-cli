@@ -1,15 +1,15 @@
 /* eslint-disable unicorn/consistent-boolean-name -- test file */
 import test from "ava";
 import { isExecutable } from "is-executable";
-import { setExecutableBit } from "#/utils.ts";
+import { makeExecutable } from "#/utils.ts";
 import { withFixture } from "./helpers/util.ts";
 
 test("sets bitmask", async t => {
 	const fixture = await withFixture(t, "non-executable.js");
 	t.false(await isExecutable(fixture), "Fixture should not be executable!");
 
-	const result = await setExecutableBit(fixture);
-	t.true(result, "setExecutableBit should return true!");
+	const result = await makeExecutable(fixture);
+	t.true(result, "Should have made fixture executable!");
 	t.true(await isExecutable(fixture), "Fixture should be executable!");
 });
 
@@ -17,13 +17,13 @@ test("does nothing if already executable", async t => {
 	const fixture = await withFixture(t, "executable.js");
 	t.true(await isExecutable(fixture), "Fixture should be executable!");
 
-	const result = await setExecutableBit(fixture);
-	t.false(result, "setExecutableBit should return false!");
+	const result = await makeExecutable(fixture);
+	t.false(result, "Should not have changed fixture executable status!");
 });
 
 test("does not handle file system errors", async t => {
 	await t.throwsAsync(
-		async () => setExecutableBit("NON-EXISTENT-FILE"),
+		async () => makeExecutable("NON-EXISTENT-FILE"),
 		{ code: "ENOENT", instanceOf: Error },
 	);
 });

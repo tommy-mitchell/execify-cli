@@ -1,6 +1,6 @@
 {
 	"$schema": "https://dprint.dev/schemas/v0.json",
-	"includes": ["**/*.{js,ts,json,jsonc,yml,markdown}"],
+	"includes": ["**/*.{js,ts,json,jsonc,yml,md}"],
 	"extends": ["node_modules/@tommy-mitchell/dprint-config/index.json"],
 	"plugins": [
 		"npm:@dprint/json@0.25.0",

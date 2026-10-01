@@ -48,7 +48,7 @@ const EXECUTABLE_MASK = fsConstants.S_IXUSR | fsConstants.S_IXGRP | fsConstants.
 
 /** Sets the executable bit on a file, if not already set. Returns `true` if the bit was changed, `false` otherwise. */
 // eslint-disable-next-line unicorn/consistent-boolean-name
-export const setExecutableBit = async (path: string): Promise<boolean> => {
+export const makeExecutable = async (path: string): Promise<boolean> => {
 	const stats = await fs.stat(path);
 
 	if ((stats.mode & EXECUTABLE_MASK) !== EXECUTABLE_MASK) {

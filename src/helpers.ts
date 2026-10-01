@@ -1,7 +1,7 @@
 import nodePath from "node:path";
 import process from "node:process";
 import type { OneOf } from "./types.ts";
-import { type Binary, hasShebang, log, readPackageJson, setExecutableBit } from "./utils.ts";
+import { type Binary, hasShebang, log, makeExecutable, readPackageJson } from "./utils.ts";
 
 type Input = {
 	input: string[];
@@ -44,7 +44,7 @@ type ExecifyResult = OneOf<{
 const execifySingle = async (path: string): Promise<ExecifyResult> => {
 	try {
 		return {
-			didExecify: await setExecutableBit(path),
+			didExecify: await makeExecutable(path),
 			hasShebang: await hasShebang(path),
 		};
 	} catch (error) {

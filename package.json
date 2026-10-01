@@ -29,6 +29,8 @@
 		"executable",
 		"chmod",
 		"chmod+x",
+		"shebang",
+		"hashbang",
 		"binary",
 		"bin"
 	],

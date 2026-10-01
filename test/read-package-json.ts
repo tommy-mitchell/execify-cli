@@ -56,7 +56,7 @@ test("returns binaries from object `bin` field", verify, {
 	fixture: "package-bin-object-multiple",
 });
 
-test("searches up for nearest `package.json`", verify, {
+test("searches for nearest `package.json`", verify, {
 	cwd: "foo/bar",
 	expected: [{ name: "bar-cli", path: "./bar/cli.js" }],
 	fixture: "package-nested",
