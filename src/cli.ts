@@ -1,57 +1,66 @@
-#!/usr/bin/env ts-node-esm
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+#!/usr/bin/env node
 import meow from "meow";
-import { getFiles, setExecutableBits, fixShebangs } from "./helpers.js";
+import { execify, getBinaries } from "./helpers.ts";
+import { log } from "./utils.ts";
 
+// dprint-ignore
 const cli = meow(`
 	Usage
-	  $ execify [globs…]
+	  $ execify [paths…]
 
 	Options
 	  --package, --pkg, -p  Set every binary in package.json as executable
-	  --fix-shebang         Convert shebangs to "#!/usr/bin/env node"
-	  --all                 Set all flags
 
 	Examples
-	  $ execify cli.js
+	  $ execify foo.js bar.ts baz/xyz.sh
+	  ✔ Execified "foo.js"
+	  ⚠ File "foo.js" is missing a shebang!
+	  ℹ File "bar.ts" is already executable
+	  ✖ Failed to execify "baz/xyz.sh", file not found
 
-	  $ execify --pkg test/fixtures/**/cli.js
-
-	  $ execify --fix-shebang dist/ts-cli.js
+	  $ execify --pkg
+	  ✔ Execified "./dist/foo.js" (foo-cli)
+	  ✔ Execified "./dist/bar.js" (bar-cli)
 `, {
-	importMeta: import.meta,
 	description: false,
 	flags: {
 		help: {
-			type: "boolean",
 			shortFlag: "h",
+			type: "boolean",
 		},
 		package: {
-			type: "boolean",
-			shortFlag: "p",
 			aliases: ["pkg"],
-		},
-		fixShebang: {
-			type: "boolean",
-		},
-		all: {
+			shortFlag: "p",
 			type: "boolean",
 		},
 	},
+	importMeta: import.meta,
 });
 
-const globs = cli.input;
-const { help: helpShortFlag, package: usePackageFlag, fixShebang, all: allFlags } = cli.flags;
-const usePackage = usePackageFlag || allFlags;
+const { flags: { package: usePackage }, input } = cli;
 
-if ((globs.length === 0 && !usePackage) || helpShortFlag) {
+if (!usePackage && input.length === 0) {
 	cli.showHelp(0);
 }
 
-const filePaths = await getFiles({ globs, usePackage });
+const binaries = await getBinaries({ input, usePackage });
+const results = await execify(binaries);
 
-await setExecutableBits(filePaths);
+for (const { didExecify, error, hasShebang, name, path } of results) {
+	const nameSuffix = name ? `(${name})` : "";
 
-if (fixShebang || allFlags) {
-	await fixShebangs(filePaths);
+	if (error) {
+		log.error(`Failed to execify "${path}", ${error}`, nameSuffix);
+		continue;
+	}
+
+	if (didExecify) {
+		log.success(`Execified "${path}"`, nameSuffix);
+	} else {
+		log.info(`File "${path}" is already executable`, nameSuffix);
+	}
+
+	if (!hasShebang) {
+		log.warn(`File "${path}" is missing a shebang!`, nameSuffix);
+	}
 }

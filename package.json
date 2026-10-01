@@ -1,7 +1,30 @@
 {
 	"name": "execify-cli",
 	"version": "0.2.1-0",
-	"description": "Easily make a Node.js CLI executable.",
+	"description": "Cross-platform `chmod +x`. Easily make a Node.js CLI executable.",
+	"license": "MIT",
+	"repository": "tommy-mitchell/execify-cli",
+	"author": "Tommy Mitchell (https://tommymitchell.io)",
+	"type": "module",
+	"imports": {
+		"#src/*.ts": "./src/*.ts"
+	},
+	"bin": {
+		"execify": "./dist/cli.js"
+	},
+	"engines": {
+		"node": "^22.22 || ^24.15 || >=26"
+	},
+	"scripts": {
+		"prepare": "npm run build",
+		"build": "tsc -p tsconfig.build.json && node dist/cli.js --pkg",
+		"lint": "dprint check && xo",
+		"format": "dprint fmt && xo --fix",
+		"test": "c8 ava"
+	},
+	"files": [
+		"dist"
+	],
 	"keywords": [
 		"cli",
 		"cli-app",
@@ -11,75 +34,39 @@
 		"chmod+x",
 		"shebang",
 		"hashbang",
-		"typescript",
 		"binary",
-		"bin",
-		"executable"
+		"bin"
 	],
-	"license": "MIT",
-	"repository": "tommy-mitchell/execify-cli",
-	"author": {
-		"name": "Tommy Mitchell",
-		"url": "https://tommymitchell.io"
-	},
-	"type": "module",
-	"engines": {
-		"node": ">=16.17"
-	},
-	"bin": {
-		"execify": "dist/cli.js"
-	},
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"prepare": "npm run build",
-		"build": "tsc -p tsconfig.build.json && node dist/cli.js --all",
-		"lint": "xo",
-		"test": "tsc --noEmit && c8 ava"
-	},
-	"ava": {
-		"files": [
-			"test/**/*.ts",
-			"!test/_test-helpers",
-			"!test/fixtures"
-		],
-		"extensions": {
-			"ts": "module"
-		},
-		"nodeArguments": [
-			"--loader=ts-node/esm",
-			"--loader=esmock",
-			"--no-warnings=ExperimentalWarning"
-		]
-	},
 	"dependencies": {
-		"globby": "^13.2.2",
-		"meow": "^12.1.0",
-		"read-pkg-up": "^10.0.0",
-		"ts-pattern": "^5.0.5"
+		"log-symbols": "^7.0.1",
+		"meow": "^14.1.0",
+		"read-package-up": "^12.0.0"
 	},
 	"devDependencies": {
-		"@tommy-mitchell/tsconfig": "^1.1.0",
-		"@types/node": "^16.17",
-		"ava": "^5.3.1",
-		"c8": "^8.0.1",
-		"cp-file": "^10.0.0",
-		"cross-env": "^7.0.3",
-		"dot-prop": "^8.0.2",
-		"esmock": "^2.3.6",
-		"execa": "^7.2.0",
-		"get-bin-path": "^10.0.0",
+		"@tommy-mitchell/dprint-config": "^0.8.0",
+		"@tommy-mitchell/eslint-config-xo": "^2.0.0-beta.11",
+		"@tommy-mitchell/tsconfig": "^4.0.0",
+		"@types/node": "^22.20",
+		"async-sema": "^3.1.1",
+		"ava": "^8.0.1",
+		"c8": "^12.0.0",
+		"dedent": "^1.7.2",
+		"dprint": "^0.58.0",
+		"execa": "^10.0.1",
+		"get-executable-bin-path": "^1.0.0",
 		"is-executable": "^2.0.1",
-		"make-executable": "^2.0.2",
-		"map-obj": "^5.0.2",
-		"p-map": "^6.0.0",
-		"proper-tags": "^2.0.1",
-		"tempy": "^3.1.0",
-		"testtriple": "^2.2.3",
-		"ts-node": "^10.9.1",
-		"type-fest": "^4.2.0",
-		"typescript": "~5.1.6",
-		"xo": "^0.56.0"
+		"test-quadruple": "^1.0.0",
+		"typescript": "~6.0.3",
+		"xo": "^5.0.1"
+	},
+	"ava": {
+		"extensions": [
+			"ts"
+		],
+		"environmentVariables": {
+			"concurrency": "10",
+			"//": "Suppress loader warnings from esmock",
+			"NODE_OPTIONS": "--disable-warning=DeprecationWarning"
+		}
 	}
 }

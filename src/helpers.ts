@@ -1,64 +1,74 @@
-/* eslint-disable unicorn/no-array-callback-reference */
-import { promises as fs, constants as fsConstants } from "node:fs";
-import { globby } from "globby";
-import { readPackageUp } from "read-pkg-up";
-import { match, P } from "ts-pattern";
+import nodePath from "node:path";
+import process from "node:process";
+import type { OneOf } from "./types.ts";
+import { type Binary, hasShebang, log, makeExecutable, readPackageJson } from "./utils.ts";
 
-type GetFilesArguments = {
-	globs: string[];
+type Input = {
+	input: string[];
 	usePackage?: boolean;
 };
 
-export const getFiles = async ({ globs, usePackage }: GetFilesArguments): Promise<string[]> => {
-	const filePaths = globs.length === 0
-		? []
-		: await globby(globs, { expandDirectories: false, onlyFiles: true });
+/** Collates input file paths and binaries from `package.json`, deduplicating any input paths in `package.json`. */
+export const getBinaries = async ({ input, usePackage }: Input): Promise<Binary[]> => {
+	const binaries: Binary[] = [];
 
 	if (usePackage) {
-		const maybePackageJson = await readPackageUp();
+		const packageBinaries = await readPackageJson();
 
-		if (!maybePackageJson) {
-			throw new Error("No package.json found.");
+		if (!packageBinaries) {
+			log.error("No package.json found.");
+			process.exit(1);
 		}
 
-		const { packageJson } = maybePackageJson;
-		const bins: string[] = match(packageJson.bin)
-			.with(P.string, bin => [bin])
-			.with(P.nullish, () => [])
-			.otherwise(bin => Object.values(bin));
-
-		filePaths.push(...bins);
+		binaries.push(...packageBinaries);
 	}
 
-	return filePaths;
+	for (const path of input) {
+		const absolutePath = nodePath.resolve(process.cwd(), path);
+
+		if (binaries.every(binary => binary.absolutePath !== absolutePath)) {
+			binaries.push({ absolutePath, path });
+		}
+	}
+
+	return binaries;
 };
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const EXECUTABLE_MASK = fsConstants.S_IXUSR | fsConstants.S_IXGRP | fsConstants.S_IXOTH;
+type ExecifyResult = OneOf<{
+	didExecify: boolean;
+	hasShebang: boolean;
+}, {
+	error: string;
+}>;
 
-const setExecutableBit = async (filePath: string) => {
-	const stats = await fs.stat(filePath);
+const execifySingle = async (path: string): Promise<ExecifyResult> => {
+	try {
+		return {
+			didExecify: await makeExecutable(path),
+			hasShebang: await hasShebang(path),
+		};
+	} catch (error) {
+		let message = String(error);
 
-	// Same as 'chmod +x'
-	if ((stats.mode & EXECUTABLE_MASK) !== EXECUTABLE_MASK) {
-		await fs.chmod(filePath, stats.mode | EXECUTABLE_MASK);
+		if (error instanceof Error) {
+			if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+				message = `file not found`;
+			} else if ((error as NodeJS.ErrnoException).code === "EACCES") {
+				message = `permission denied`;
+			} else {
+				message = error.message;
+			}
+		}
+
+		return { error: message };
 	}
 };
 
-export const setExecutableBits = async (filePaths: string[]) => (
-	Promise.all(filePaths.map(setExecutableBit))
-);
+type ExecifyOutput = Binary & ExecifyResult;
 
-const fixShebang = async (filePath: string) => {
-	const file = await fs.readFile(filePath, "utf8");
-	const lines = file.split(/\r?\n/);
-
-	if (lines.at(0)?.startsWith("#!/")) {
-		lines[0] = "#!/usr/bin/env node";
-		await fs.writeFile(filePath, lines.join("\n"), "utf8");
-	}
-};
-
-export const fixShebangs = async (filePaths: string[]) => (
-	Promise.all(filePaths.map(fixShebang))
+export const execify = async (binaries: Binary[]): Promise<ExecifyOutput[]> => (
+	Promise.all(binaries.map(async (binary) => {
+		const result = await execifySingle(binary.absolutePath ?? binary.path);
+		return { ...binary, ...result };
+	}))
 );
