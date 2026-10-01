@@ -29,9 +29,5 @@ export default [...configs.xo, ...configs.dprint, {
 			allowNumber: false,
 			allowString: true, // diff from xo
 		}],
-		"no-warning-comments": "off",
-		"unicorn/expiring-todo-comments": ["error", {
-			allowWarningComments: false,
-		}],
 	},
 }];

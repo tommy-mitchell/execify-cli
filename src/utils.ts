@@ -1,9 +1,9 @@
 import { constants as fsConstants, promises as fs } from "node:fs";
+import nodePath from "node:path";
 import logSymbols from "log-symbols";
 import { readPackageUp } from "read-package-up";
 
 export const log = {
-	// TODO: do i need stderr?
 	error: (...messages: string[]) => console.log(logSymbols.error, ...messages),
 	info: (...messages: string[]) => console.log(logSymbols.info, ...messages),
 	success: (...messages: string[]) => console.log(logSymbols.success, ...messages),
@@ -11,11 +11,21 @@ export const log = {
 };
 
 export type Binary = {
+	absolutePath?: string;
 	name?: string;
 	path: string;
 };
 
-// TODO: resolve paths to absolutes?
+type PackageBinary = [
+	name: string,
+	path: string,
+];
+
+const resolveBinary = ([name, path]: PackageBinary, packageJsonPath: string): Binary => ({
+	absolutePath: nodePath.resolve(nodePath.dirname(packageJsonPath), path),
+	name,
+	path,
+});
 
 /** Parses all binaries from the nearest `package.json`, returning `undefined` if none exist. */
 export const readPackageJson = async (): Promise<Binary[] | undefined> => {
@@ -25,15 +35,16 @@ export const readPackageJson = async (): Promise<Binary[] | undefined> => {
 		return;
 	}
 
-	const { packageJson } = maybePackageJson;
+	const { packageJson, path: packageJsonPath } = maybePackageJson;
+	const { bin, name } = packageJson;
 
-	if (!packageJson.bin) {
+	if (!bin) {
 		return [];
 	}
 
-	return typeof packageJson.bin === "string"
-		? [{ name: packageJson.name, path: packageJson.bin }]
-		: Object.entries(packageJson.bin).map(([name, path]) => ({ name, path }));
+	return typeof bin === "string"
+		? [resolveBinary([name, bin], packageJsonPath)]
+		: Object.entries(bin).map(binary => resolveBinary(binary, packageJsonPath));
 };
 
 const EXECUTABLE_MASK = fsConstants.S_IXUSR | fsConstants.S_IXGRP | fsConstants.S_IXOTH;

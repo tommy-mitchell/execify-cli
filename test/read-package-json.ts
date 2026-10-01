@@ -1,4 +1,4 @@
-import path from "node:path";
+import nodePath from "node:path";
 import test from "ava";
 import * as tq from "test-quadruple";
 import type { Binary } from "../src/utils.ts";
@@ -22,9 +22,11 @@ type MacroArgs = [{
 
 const verify = test.macro<MacroArgs>(async (t, { cwd, expected, fixture: fixtureName }) => {
 	const fixture = await withFixture(t, fixtureName);
-	const { readPackageJson } = await withCwd(cwd ? path.join(fixture, cwd) : fixture);
+	const { readPackageJson } = await withCwd(cwd ? nodePath.join(fixture, cwd) : fixture);
 
-	const binaries = await readPackageJson();
+	const _binaries = await readPackageJson();
+	const binaries = _binaries?.map(({ name, path }) => ({ name, path }));
+
 	t.deepEqual(binaries, expected);
 });
 
@@ -56,7 +58,7 @@ test("returns binaries from object `bin` field", verify, {
 
 test("searches up for nearest `package.json`", verify, {
 	cwd: "foo/bar",
-	expected: [{ name: "foo-cli", path: "foo.js" }],
+	expected: [{ name: "bar-cli", path: "./bar/cli.js" }],
 	fixture: "package-nested",
 });
 

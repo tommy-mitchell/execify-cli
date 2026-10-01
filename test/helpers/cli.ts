@@ -1,11 +1,12 @@
 /* eslint-disable ava/no-ignored-test-files, unicorn/no-top-level-side-effects -- invalid */
+import path from "node:path";
 import process from "node:process";
 import anyTest, { type TestFn } from "ava";
 import { Sema } from "async-sema";
-import { execa, parseCommandString } from "execa";
+import { execa, type ExecaError, parseCommandString } from "execa";
 import { getExecutableBinPath } from "get-executable-bin-path";
 import type { RequireExactlyOne as OneOf } from "type-fest";
-import { withFixture } from "./util.ts";
+import { trimLines, withFixture } from "./util.ts";
 
 export const test = anyTest as TestFn<{
 	binPath: string;
@@ -41,14 +42,25 @@ type VerifyCliMacroArgs = [
 		expected: string;
 	}> & {
 		args?: string;
+		cwd?: string;
 		fixture?: string;
 	},
 ];
 
-export const verifyCli = test.macro<VerifyCliMacroArgs>(async (t, { args = "", error, expected, fixture }) => {
-	const cwd = fixture ? await withFixture(t, fixture) : undefined;
-	const { all: output, exitCode } = await $(t.context.binPath, parseCommandString(args), { cwd });
+export const verifyCli = test.macro<VerifyCliMacroArgs>(async (
+	t,
+	{ args = "", cwd: optCwd = "", error, expected, fixture },
+) => {
+	const cwd = fixture ? path.join(await withFixture(t, fixture), optCwd) : undefined;
+	const resultOrError = await $(t.context.binPath, parseCommandString(args), { cwd });
 
-	t.is(output, expected ?? error);
+	if (resultOrError.failed && resultOrError.exitCode === undefined) {
+		// eslint-disable-next-line @typescript-eslint/only-throw-error -- types are wrong, class is an actual Error instance
+		throw resultOrError as ExecaError;
+	}
+
+	const { all: output, exitCode } = resultOrError;
+
+	t.is(trimLines(output), trimLines(expected ?? error));
 	t.is(exitCode, expected ? 0 : 1, "Process exited with incorrect exit code!");
 });

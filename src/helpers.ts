@@ -19,7 +19,7 @@ export const getBinaries = async ({ input, usePackage }: GetFilesArguments): Pro
 		}
 
 		binaries.push(...packageBinaries);
-		input = input.filter(path => packageBinaries.every(binary => binary.path !== path));
+		input = input.filter(path => packageBinaries.every(binary => binary.path !== path && binary.path !== `./${path}`));
 	}
 
 	return [...binaries, ...input.map(path => ({ path }))];
@@ -27,12 +27,20 @@ export const getBinaries = async ({ input, usePackage }: GetFilesArguments): Pro
 
 type ExecifyResult = {
 	didExecify: boolean;
-	error?: string;
+	error?: never;
+	hasShebang: boolean;
+} | {
+	didExecify?: never;
+	error: string;
+	hasShebang?: never;
 };
 
 const execifySingle = async (filePath: string): Promise<ExecifyResult> => {
 	try {
-		return { didExecify: await setExecutableBit(filePath) };
+		return {
+			didExecify: await setExecutableBit(filePath),
+			hasShebang: await hasShebang(filePath),
+		};
 	} catch (error) {
 		let message = String(error);
 
@@ -46,29 +54,15 @@ const execifySingle = async (filePath: string): Promise<ExecifyResult> => {
 			}
 		}
 
-		return { didExecify: false, error: message };
+		return { error: message };
 	}
 };
 
-export const execify = async (binaries: Binary[]): Promise<void[]> => (
-	Promise.all(binaries.map(async ({ name, path }) => {
-		const { didExecify, error } = await execifySingle(path);
-		const nameSuffix = name ? `(${name})` : "";
+type ExecifyOutput = Binary & ExecifyResult;
 
-		if (didExecify) {
-			log.success(`Execified "${path}"`, nameSuffix);
-		} else if (error) {
-			log.error(`Failed to execify "${path}", ${error}`, nameSuffix);
-		} else {
-			log.info(`File "${path}" is already executable`, nameSuffix);
-		}
-
-		try {
-			if (!await hasShebang(path)) {
-				log.warn(`File "${path}" is missing a shebang!`, nameSuffix);
-			}
-		} catch {
-			// Errors here don't matter, one is already logged if the file is non-existent
-		}
+export const execify = async (binaries: Binary[]): Promise<ExecifyOutput[]> => (
+	Promise.all(binaries.map(async (binary) => {
+		const result = await execifySingle(binary.absolutePath ?? binary.path);
+		return { ...binary, ...result };
 	}))
 );

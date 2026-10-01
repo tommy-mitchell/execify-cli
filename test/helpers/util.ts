@@ -24,16 +24,18 @@ export const withTemporaryDirectory = async (t: ExecutionContext) => {
 /** Copies a fixture to a temporary directory and returns path to copied fixture. */
 export const withFixture = async (t: ExecutionContext, name: string) => {
 	const temporaryDir = await withTemporaryDirectory(t);
-	const fixture = path.join(temporaryDir, name);
 
-	const originalFixture = atFixture(name);
-	const isDirectory = !originalFixture.includes(".");
+	const fixture = atFixture(name);
+	const isDirectory = !fixture.includes(".");
 
 	if (isDirectory) {
-		await fs.cp(originalFixture, temporaryDir, { recursive: true });
-	} else {
-		await fs.copyFile(originalFixture, fixture);
+		await fs.cp(fixture, temporaryDir, { recursive: true });
+		return temporaryDir;
 	}
 
-	return fixture;
+	const copiedFixture = path.join(temporaryDir, name);
+	await fs.copyFile(fixture, copiedFixture);
+	return copiedFixture;
 };
+
+export const trimLines = (input: string) => input.split("\n").map(line => line.trim()).join("\n");

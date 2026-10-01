@@ -1,7 +1,7 @@
 {
 	"name": "foo",
 	"bin": {
-		"bar": "./executable.ts",
-		"baz": "./nested/non-executable.ts"
+		"bar-cli": "./executable.ts",
+		"baz-cli": "./nested/non-executable.sh"
 	}
 }
