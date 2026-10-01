@@ -1,15 +1,10 @@
-import { constants as fsConstants, promises as fs } from "node:fs";
+import process from "node:process";
 import logSymbols from "log-symbols";
-import { readPackageUp } from "read-package-up";
+import { type Binary, readPackageJson, setExecutableBit } from "./utils.ts";
 
 type GetFilesArguments = {
 	input: string[];
 	usePackage?: boolean;
-};
-
-type Binary = {
-	name?: string;
-	path: string;
 };
 
 /** Collates input file paths and binaries from `package.json`, deduplicating any input paths in `package.json`. */
@@ -17,45 +12,18 @@ export const getBinaries = async ({ input, usePackage }: GetFilesArguments): Pro
 	const binaries: Binary[] = [];
 
 	if (usePackage) {
-		const maybePackageJson = await readPackageUp();
+		const packageBinaries = await readPackageJson();
 
-		if (!maybePackageJson) {
-			throw new Error("No package.json found.");
+		if (!packageBinaries) {
+			console.error(`${logSymbols.error} No package.json found.`);
+			process.exit(1);
 		}
 
-		const { packageJson } = maybePackageJson;
-
-		if (!packageJson.bin) {
-			return binaries;
-		}
-
-		if (typeof packageJson.bin === "string") {
-			binaries.push({ name: packageJson.name, path: packageJson.bin });
-			input = input.filter(p => p !== packageJson.bin);
-		} else {
-			for (const [name, path] of Object.entries(packageJson.bin)) {
-				binaries.push({ name, path });
-				input = input.filter(p => p !== path);
-			}
-		}
+		binaries.push(...packageBinaries);
+		input = input.filter(path => packageBinaries.every(binary => binary.path !== path));
 	}
 
 	return [...binaries, ...input.map(path => ({ path }))];
-};
-
-const EXECUTABLE_MASK = fsConstants.S_IXUSR | fsConstants.S_IXGRP | fsConstants.S_IXOTH;
-
-// eslint-disable-next-line unicorn/consistent-boolean-name
-const setExecutableBit = async (filePath: string): Promise<boolean> => {
-	const stats = await fs.stat(filePath);
-
-	// Same as 'chmod +x'
-	if ((stats.mode & EXECUTABLE_MASK) !== EXECUTABLE_MASK) {
-		await fs.chmod(filePath, stats.mode | EXECUTABLE_MASK);
-		return true;
-	}
-
-	return false;
 };
 
 type ExecifyResult = {
@@ -65,8 +33,7 @@ type ExecifyResult = {
 
 const execifySingle = async (filePath: string): Promise<ExecifyResult> => {
 	try {
-		const didExecify = await setExecutableBit(filePath);
-		return { didExecify };
+		return { didExecify: await setExecutableBit(filePath) };
 	} catch (error) {
 		let message = String(error);
 
@@ -92,7 +59,7 @@ export const execify = async (binaries: Binary[]): Promise<void[]> => (
 		if (didExecify) {
 			console.log(`${logSymbols.success} Execified "${path}"${nameSuffix}`);
 		} else if (error) { // eslint-disable-line @typescript-eslint/strict-boolean-expressions
-			console.error(`${logSymbols.error} Failed to execify "${path}", ${error}${nameSuffix}`);
+			console.log(`${logSymbols.error} Failed to execify "${path}", ${error}${nameSuffix}`);
 		} else {
 			console.log(`${logSymbols.info} "${path}" already executable${nameSuffix}`);
 		}
