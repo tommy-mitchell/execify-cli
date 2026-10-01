@@ -1,7 +1,7 @@
 {
 	"name": "execify-cli",
 	"version": "0.2.1-0",
-	"description": "Easily make a Node.js CLI executable.",
+	"description": "Cross-platform `chmod +x`. Easily make a Node.js CLI executable.",
 	"license": "MIT",
 	"repository": "tommy-mitchell/execify-cli",
 	"author": "Tommy Mitchell (https://tommymitchell.io)",

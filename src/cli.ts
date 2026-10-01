@@ -11,10 +11,10 @@ const cli = meow(`
 	  --package, --pkg, -p  Set every binary in package.json as executable
 
 	Examples
-	  $ execify dist/cli.js dist/bin.ts dist/foo.cjs
-	  ✔ Execified "dist/cli.js"
-	  ℹ "dist/cli.ts" already executable
-	  ✖ Failed to execify "dist/foo.cjs", file not found
+	  $ execify foo.js bar.ts baz/xyz.sh
+	  ✔ Execified "foo.js"
+	  ℹ "bar.ts" already executable
+	  ✖ Failed to execify "baz/xyz.sh", file not found
 
 	  $ execify --pkg
 	  ✔ Execified "dist/foo.js" (foo-cli)
