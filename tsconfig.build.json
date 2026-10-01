@@ -2,10 +2,10 @@
 	"extends": "./tsconfig.json",
 	"include": ["src"],
 	"compilerOptions": {
-		"outDir": "dist",
-		"rootDir": "./src",
-		"noEmit": false,
 		"declaration": false,
-		"removeComments": true
+		"noEmit": false,
+		"outDir": "dist",
+		"removeComments": true,
+		"rootDir": "./src"
 	}
 }

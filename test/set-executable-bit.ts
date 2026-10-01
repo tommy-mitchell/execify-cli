@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/consistent-boolean-name -- test file */
 import test from "ava";
 import { isExecutable } from "is-executable";
-import { setExecutableBit } from "../src/utils.ts";
+import { setExecutableBit } from "#/utils.ts";
 import { withFixture } from "./helpers/util.ts";
 
 test("sets bitmask", async t => {

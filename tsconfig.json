@@ -1,12 +1,12 @@
 {
 	"extends": "@tommy-mitchell/tsconfig",
-	"exclude": ["node_modules", "coverage", "dist"],
 	"include": ["src", "test"],
 	"compilerOptions": {
+		"erasableSyntaxOnly": true,
+		"moduleResolution": "nodenext",
+		"rewriteRelativeImportExtensions": true,
 		"noEmit": true,
 		"types": ["node"],
-		"rewriteRelativeImportExtensions": true,
-		"erasableSyntaxOnly": true,
 		"verbatimModuleSyntax": true,
 	},
 }

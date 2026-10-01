@@ -1,7 +1,7 @@
 import nodePath from "node:path";
 import test from "ava";
 import * as tq from "test-quadruple";
-import type { Binary } from "../src/utils.ts";
+import type { Binary } from "#/utils.ts";
 import { withFixture } from "./helpers/util.ts";
 
 const withCwd = async (cwd: string) => (

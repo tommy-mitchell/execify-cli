@@ -5,7 +5,7 @@ import anyTest, { type TestFn } from "ava";
 import { Sema } from "async-sema";
 import { execa, type ExecaError, parseCommandString } from "execa";
 import { getExecutableBinPath } from "get-executable-bin-path";
-import type { OneOf } from "../../src/types.ts";
+import type { OneOf } from "#/types.ts";
 import { trimLines, withFixture } from "./util.ts";
 
 export const test = anyTest as TestFn<{

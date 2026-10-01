@@ -63,5 +63,8 @@
 			"//": "Suppress loader warnings from esmock",
 			"NODE_OPTIONS": "--disable-warning=DeprecationWarning"
 		}
+	},
+	"imports": {
+		"#/*.ts": "./src/*.ts"
 	}
 }

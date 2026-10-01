@@ -1,12 +1,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { ExecutionContext } from "ava";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const atFixture = (name: string) => path.join(__dirname, "..", "fixtures", name);
+const atFixture = (name: string) => path.join(import.meta.dirname, "..", "fixtures", name);
 
 /** Makes a temporary directory and registers a teardown to remove it. */
 export const withTemporaryDirectory = async (t: ExecutionContext) => {
