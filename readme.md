@@ -37,7 +37,8 @@ Options
 Examples
   $ execify foo.js bar.ts baz/xyz.sh
   ✔ Execified "foo.js"
-  ℹ "bar.ts" already executable
+  ⚠ File "foo.js" is missing a shebang!
+  ℹ File "bar.ts" is already executable
   ✖ Failed to execify "baz/xyz.sh", file not found
 
   $ execify --pkg

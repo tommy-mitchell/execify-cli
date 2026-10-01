@@ -1,6 +1,5 @@
 import process from "node:process";
-import logSymbols from "log-symbols";
-import { type Binary, readPackageJson, setExecutableBit } from "./utils.ts";
+import { type Binary, hasShebang, log, readPackageJson, setExecutableBit } from "./utils.ts";
 
 type GetFilesArguments = {
 	input: string[];
@@ -15,7 +14,7 @@ export const getBinaries = async ({ input, usePackage }: GetFilesArguments): Pro
 		const packageBinaries = await readPackageJson();
 
 		if (!packageBinaries) {
-			console.error(`${logSymbols.error} No package.json found.`);
+			log.error("No package.json found.");
 			process.exit(1);
 		}
 
@@ -54,14 +53,22 @@ const execifySingle = async (filePath: string): Promise<ExecifyResult> => {
 export const execify = async (binaries: Binary[]): Promise<void[]> => (
 	Promise.all(binaries.map(async ({ name, path }) => {
 		const { didExecify, error } = await execifySingle(path);
-		const nameSuffix = name ? ` (${name})` : "";
+		const nameSuffix = name ? `(${name})` : "";
 
 		if (didExecify) {
-			console.log(`${logSymbols.success} Execified "${path}"${nameSuffix}`);
+			log.success(`Execified "${path}"`, nameSuffix);
 		} else if (error) {
-			console.log(`${logSymbols.error} Failed to execify "${path}", ${error}${nameSuffix}`);
+			log.error(`Failed to execify "${path}", ${error}`, nameSuffix);
 		} else {
-			console.log(`${logSymbols.info} "${path}" already executable${nameSuffix}`);
+			log.info(`File "${path}" is already executable`, nameSuffix);
+		}
+
+		try {
+			if (!await hasShebang(path)) {
+				log.warn(`File "${path}" is missing a shebang!`, nameSuffix);
+			}
+		} catch {
+			// Errors here don't matter, one is already logged if the file is non-existent
 		}
 	}))
 );

@@ -1,12 +1,23 @@
 import { constants as fsConstants, promises as fs } from "node:fs";
+import logSymbols from "log-symbols";
 import { readPackageUp } from "read-package-up";
+
+export const log = {
+	// TODO: do i need stderr?
+	error: (...messages: string[]) => console.log(logSymbols.error, ...messages),
+	info: (...messages: string[]) => console.log(logSymbols.info, ...messages),
+	success: (...messages: string[]) => console.log(logSymbols.success, ...messages),
+	warn: (...messages: string[]) => console.log(logSymbols.warning, ...messages),
+};
 
 export type Binary = {
 	name?: string;
 	path: string;
 };
 
-/** Parses all binaries from the nearest `package.json`, returning `undefined` if none exists. */
+// TODO: resolve paths to absolutes?
+
+/** Parses all binaries from the nearest `package.json`, returning `undefined` if none exist. */
 export const readPackageJson = async (): Promise<Binary[] | undefined> => {
 	const maybePackageJson = await readPackageUp();
 
@@ -39,4 +50,11 @@ export const setExecutableBit = async (path: string): Promise<boolean> => {
 	}
 
 	return false;
+};
+
+const SHEBANG_REGEX = /^#!.+/v;
+
+export const hasShebang = async (path: string): Promise<boolean> => {
+	const content = await fs.readFile(path, "utf8");
+	return SHEBANG_REGEX.test(content);
 };
