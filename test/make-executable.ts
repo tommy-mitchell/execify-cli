@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/consistent-boolean-name -- test file */
 import test from "ava";
 import { isExecutable } from "is-executable";
-import { makeExecutable } from "#/utils.ts";
+import { makeExecutable } from "#src/utils.ts"; // TODO[engine:node@>=24.14]: use #/
 import { withFixture } from "./helpers/util.ts";
 
 test("sets bitmask", async t => {

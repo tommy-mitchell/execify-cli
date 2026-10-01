@@ -67,6 +67,6 @@
 		}
 	},
 	"imports": {
-		"#/*.ts": "./src/*.ts"
+		"#src/*.ts": "./src/*.ts"
 	}
 }
